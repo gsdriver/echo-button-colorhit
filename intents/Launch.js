@@ -1,8 +1,10 @@
 //
-// Provides help
+// Starts the skill
 //
 
 'use strict';
+
+const utils = require('../utils');
 
 module.exports = {
   handleIntent: function() {
@@ -59,7 +61,14 @@ module.exports = {
       },
     });
 
-    this.response.speak(this.t('LAUNCH_WELCOME')).listen('LAUNCH_WELCOME_REPROMPT');
+    // build 'idle' breathing animation that will play immediately
+    const breathAnimation = utils.buildBreathAnimation('000000', 'ffffff', 30, 1200);
+    this.response._addDirective(utils.buildButtonIdleAnimationDirective([], breathAnimation));
+
+    // build 'button down' animation for when the button is pressed
+    this.response._addDirective(utils.buildButtonDownAnimationDirective([]));
+
+    this.response.speak(this.t('LAUNCH_WELCOME')).listen(this.t('LAUNCH_WELCOME_REPROMPT'));
     this.handler.response.response.shouldEndSession = false;
     this.emit(':responseReady');
   },

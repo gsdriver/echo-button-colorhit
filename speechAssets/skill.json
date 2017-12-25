@@ -1,0 +1,30 @@
+{
+  "languageModel": {
+    "intents": [
+      {
+        "name": "AMAZON.CancelIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.HelpIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.StopIntent",
+        "samples": []
+      },
+      {
+        "name": "HighScoreIntent",
+        "samples": [
+          "read high scores",
+          "read leader board",
+          "high scores",
+          "what are the high scores",
+          "tell me the leader board"
+        ],
+        "slots": []
+      }
+    ],
+    "invocationName": "match that color"
+  }
+}

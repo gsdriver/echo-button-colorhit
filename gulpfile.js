@@ -13,6 +13,7 @@ gulp.task('build:prepare', ['clean'], () =>
   // copy only what we need for deployment
   gulp.src(['**/*', '!build/**', '!.git', '!.git/**', '!package.json', '!README.md',
     '!.eslintrc.json', '!lint-report.html', '!gulpfile.js', '!speechAssets', '!speechAssets/**',
+    '!update.bat', '!test', '!test/**',
     '!.gitignore', '!.idea', '!.idea/**', '!*.zip'], {dot: true})
     .pipe(gulp.dest('build/'))
 );

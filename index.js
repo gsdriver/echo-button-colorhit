@@ -7,21 +7,25 @@
 const AWS = require('aws-sdk');
 const Alexa = require('alexa-sdk');
 const Launch = require('./intents/Launch');
+const GameInput = require('./intents/GameInput');
 const Exit = require('./intents/Exit');
 const Help = require('./intents/Help');
+const resources = require('./resources');
 
-const APP_ID = 'amzn1.ask.skill.5fdf0343-ea7d-40c2-8c0b-c7216b98aa04';
+const APP_ID = 'amzn1.ask.skill.04a12ea1-87d2-4fe2-9f4f-a6f300e7f0f9';
 
 // Handlers for our skill
-const handlers = {
+const playRoundHandlers = Alexa.CreateStateHandler('PLAYROUND', {
   'NewSession': function() {
-    if (this.event.request.type === 'IntentRequest') {
-      this.emit(this.event.request.intent.name);
-    } else {
-      this.emit('LaunchRequest');
-    }
+    this.handler.state = '';
+    delete this.attributes.STATE;
+    this.emitWithState('NewSession');
   },
-  'LaunchRequest': Launch.handleIntent,
+  'GameEngine.InputHandlerEvent': GameInput.handleIntent,
+  'System.ExceptionEncountered': function() {
+    // I wonder went went wrong?
+    console.log('Samantha says you have an exception!');
+  },
   'AMAZON.HelpIntent': Help.handleIntent,
   'AMAZON.StopIntent': Exit.handleIntent,
   'AMAZON.CancelIntent': Exit.handleIntent,
@@ -31,7 +35,36 @@ const handlers = {
     this.emit(':responseReady');
   },
   'Unhandled': function() {
-    this.response.speak(this.t('UNKNOWN_INTENT')).listen('UNKNOWN_INTENT_REPROMPT');
+    this.response.speak(this.t('UNHANDLED_INTENT')).listen('UNHANDLED_INTENT_REPROMPT');
+    this.handler.response.response.shouldEndSession = false;
+    this.emit(':responseReady');
+  },
+});
+
+const handlers = {
+  'NewSession': function() {
+    if (this.event.request.type === 'IntentRequest') {
+      this.emit(this.event.request.intent.name);
+    } else {
+      this.emit('LaunchRequest');
+    }
+  },
+  'LaunchRequest': Launch.handleIntent,
+  'GameEngine.InputHandlerEvent': GameInput.handleIntent,
+  'System.ExceptionEncountered': function() {
+    // I wonder went went wrong?
+    console.log('Samantha says you have an exception!');
+  },
+  'AMAZON.HelpIntent': Help.handleIntent,
+  'AMAZON.StopIntent': Exit.handleIntent,
+  'AMAZON.CancelIntent': Exit.handleIntent,
+  'SessionEndedRequest': function() {
+    this.response.speak(this.t('SESSION_END'));
+    this.handler.response.response.shouldEndSession = true;
+    this.emit(':responseReady');
+  },
+  'Unhandled': function() {
+    this.response.speak(this.t('UNHANDLED_INTENT')).listen('UNHANDLED_INTENT_REPROMPT');
     this.handler.response.response.shouldEndSession = false;
     this.emit(':responseReady');
   },
@@ -42,8 +75,8 @@ exports.handler = function(event, context) {
   const alexa = Alexa.handler(event, context);
 
   alexa.appId = APP_ID;
-  alexa.dynamoDBTableName = 'EchoButtonColorHitData';
+  alexa.dynamoDBTableName = 'MatchThatColorData';
   alexa.resources = resources.languageStrings;
-  alexa.registerHandlers(handlers, sayNameHandlers, confirmNameHandlers);
+  alexa.registerHandlers(playRoundHandlers, handlers);
   alexa.execute();
 };
